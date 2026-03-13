@@ -9,6 +9,13 @@ void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void processInput(GLFWwindow* window)
+{
+    // close window if escape key is pressed
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+
 int main()
 {
     // initialize glfw
@@ -45,6 +52,14 @@ int main()
     // render loop
     while (!glfwWindowShouldClose(window))
     {
+        // handle input
+        processInput(window);
+
+        // rendering commands
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // check and call events and swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

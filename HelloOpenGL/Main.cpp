@@ -1,20 +1,15 @@
-#include "glad/glad.h" // glad manages function pointers for OpenGL
-#include "GLFW/glfw3.h"
+#include <glad/glad.h> // glad manages function pointers for OpenGL
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 
 // handle window resize
-void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
+void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
 
-void processInput(GLFWwindow* window)
-{
-    // close window if escape key is pressed
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
+void processInput(GLFWwindow* window);
+
+const GLuint windowHeight = 800;
+const GLuint windowWidth = 600;
 
 int main()
 {
@@ -23,9 +18,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    const int windowHeight = 800;
-    const int windowWidth = 600;
 
     // create a window object
     GLFWwindow* window = glfwCreateWindow(windowHeight, windowWidth, "HelloOpenGL", NULL, NULL);
@@ -66,4 +58,16 @@ int main()
 
     glfwTerminate();
     return 0;
+}
+
+void frame_buffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void processInput(GLFWwindow* window)
+{
+    // close window if escape key is pressed
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }

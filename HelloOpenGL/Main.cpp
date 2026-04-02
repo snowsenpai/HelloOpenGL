@@ -102,17 +102,32 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    // traingle
+    //GLfloat vertices[] = {
+    //    -0.5f, -0.5f, 0.0f, // left
+    //     0.5f, -0.5f, 0.0f, // right
+    //     0.0f,  0.5f, 0.0f  // top
+    //};
+
+    // square
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left
-         0.5f, -0.5f, 0.0f, // right
-         0.0f,  0.5f, 0.0f  // top
+        0.5f,  0.5f, 0.0f,  // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f   // top left 
+    };
+
+    GLint indices[] = {
+        0, 1, 3,   // first triangle, starts from 0!
+        1, 2, 3    // second triangle
     };
 
     // setup buffer objects
-    GLuint VBO, VAO;
+    GLuint VBO, VAO, EBO;
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     
     // bind the Vertex Array Object first
     glBindVertexArray(VAO);
@@ -120,6 +135,10 @@ int main()
     // bind and set vertex buffers
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // bind and copy indices for ebo
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // linking vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // registers VBO as the vertex attribute's bound vertex buffer object
@@ -148,7 +167,9 @@ int main()
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // check and call events and swap buffers
         glfwSwapBuffers(window);

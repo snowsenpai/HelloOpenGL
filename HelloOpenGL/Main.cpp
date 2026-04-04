@@ -137,13 +137,6 @@ int main()
     glDeleteShader(fragmentShader);
     glDeleteShader(yellowFragmentShader);
 
-    // traingle
-    //GLfloat vertices[] = {
-    //    -0.5f, -0.5f, 0.0f, // left
-    //     0.5f, -0.5f, 0.0f, // right
-    //     0.0f,  0.5f, 0.0f  // top
-    //};
-
     // 2 traingles side by side
     GLfloat vertices[] = {
         // 1st
@@ -172,43 +165,36 @@ int main()
     //};
 
     // setup buffer objects
-    GLuint VBO, VAO;
-    GLuint VBO1, VAO1;
+    GLuint VBO[2], VAO[2];
     //GLuint VBO, VAO, EBO;
 
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    glGenVertexArrays(2, VAO);
+    glGenBuffers(2, VBO);
 
-    glGenVertexArrays(1, &VAO1);
-    glGenBuffers(1, &VBO1);
     //glGenBuffers(1, &EBO);
     
-    // bind the Vertex Array Object first
     // manipulate state for 1st triangle
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindVertexArray(VAO[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    //glBindVertexArray(0); // no need to unbind, 2nd triangle will bind another vao
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // manipulate state for 2nd triangle
-    glBindVertexArray(VAO1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+    glBindVertexArray(VAO[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // registers VBO as the vertex attribute's bound vertex buffer object
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glBindVertexArray(0); // not necessary: there are no other vao to bind and no function calls that could affect currently binded vao is used
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // bind and copy indices for ebo
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // can unbind vbo safely
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // unbind vao
-    //glBindVertexArray(0); // 
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -226,13 +212,12 @@ int main()
         // use shader program
         glUseProgram(shaderProgram);
         // render 1st triangle using first vao data, "VAO"
-        glBindVertexArray(VAO);
+        glBindVertexArray(VAO[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // use second shader program for 2nd triangle
-        // render 2nd triangle using 2nd vao data "VAO1"
         glUseProgram(yellowShaderProgram);
-        glBindVertexArray(VAO1);
+        glBindVertexArray(VAO[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -242,10 +227,8 @@ int main()
         glfwPollEvents();
     }
     // optionally deallocate resources
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteVertexArrays(1, &VAO1);
-    glDeleteBuffers(1, &VBO1);
+    glDeleteVertexArrays(1, VAO);
+    glDeleteBuffers(1, VBO);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();

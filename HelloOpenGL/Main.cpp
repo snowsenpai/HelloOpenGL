@@ -137,63 +137,44 @@ int main()
     glDeleteShader(fragmentShader);
     glDeleteShader(yellowFragmentShader);
 
-    // 2 traingles side by side
+    // star
     GLfloat vertices[] = {
-        // 1st
-        -0.9f, -0.5f, 0.0f, // left
-        -0.15f, -0.5f, 0.0f, // right
-        -0.25f,  0.5f, 0.0f,  // top
-    };
-    GLfloat vertices1[] = {
-        // 2nd
-        0.15f, -0.25f, 0.0f, // left
-        0.7f, -0.25f, 0.0f, // right
-        0.25f,  0.25f, 0.0f  // top
+        0.0f, 0.9f, 0.0f, // 0, top
+        -0.5f, 0.3f, 0.0f, // 1, outer left 2nd level
+        -0.13f, 0.3f, 0.0f, // 2, inner left 2nd level
+        0.13f, 0.3f, 0.0f, // 3, inner right 2nd level
+        0.5f, 0.3f, 0.0f, // 4, outer right 2nd level
+        -0.25f, 0.0f, 0.0f, // 5, left 3rd level
+        0.1f, 0.0f, 0.0f, // 6, right 3rd level
+        0.0f, -0.15f, 0.0f, // 7, bott0m
+        -0.3f, -0.4f, 0.0f, // 8, bottom left
+        0.3f, -0.4f, 0.0f // 9, bottom right
     };
 
-    // square
-    //GLfloat vertices[] = {
-    //    0.5f,  0.5f, 0.0f,  // top right
-    //    0.5f, -0.5f, 0.0f,  // bottom right
-    //    -0.5f, -0.5f, 0.0f,  // bottom left
-    //    -0.5f,  0.5f, 0.0f   // top left 
-    //};
-
-    //GLint indices[] = {
-    //    0, 1, 3,   // first triangle, starts from 0!
-    //    1, 2, 3    // second triangle
-    //};
+    GLint indices[] = {
+        0, 5, 9,   // 1st triangle
+        1, 2, 5,    // 2nd triangle
+        3, 4, 6,   // 3rd triangle
+        5, 8, 7    // 4th triangle
+    };
 
     // setup buffer objects
-    GLuint VBO[2], VAO[2];
-    //GLuint VBO, VAO, EBO;
+    GLuint VBO, VAO, EBO;
 
-    glGenVertexArrays(2, VAO);
-    glGenBuffers(2, VBO);
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
-    //glGenBuffers(1, &EBO);
-    
-    // manipulate state for 1st triangle
-    glBindVertexArray(VAO[0]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // manipulate state for 2nd triangle
-    glBindVertexArray(VAO[1]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     // can unbind vbo safely
 
     // uncomment this call to draw in wireframe polygons.
@@ -211,15 +192,8 @@ int main()
 
         // use shader program
         glUseProgram(shaderProgram);
-        // render 1st triangle using first vao data, "VAO"
-        glBindVertexArray(VAO[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        // use second shader program for 2nd triangle
-        glUseProgram(yellowShaderProgram);
-        glBindVertexArray(VAO[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         // check and call events and swap buffers
@@ -227,8 +201,9 @@ int main()
         glfwPollEvents();
     }
     // optionally deallocate resources
-    glDeleteVertexArrays(1, VAO);
-    glDeleteBuffers(1, VBO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();

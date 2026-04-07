@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <cmath>
 
 // handle window resize
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
@@ -13,19 +14,17 @@ const GLuint windowWidth = 600;
 
 const GLchar* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
-"out vec4 greenColor;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"   greenColor = vec4(0.0f, 1.0f, 0.1f, 1.0);\n"
 "}\0";
 
 const GLchar* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"in vec4 greenColor;\n"
+"uniform vec4 redColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = greenColor;\n"
+"   FragColor = redColor;\n"
 "}\0";
 
 int main()
@@ -158,8 +157,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // use shader program
+        // get and set uniform variable location for redColor
+        float timeValue = static_cast<float>(glfwGetTime());
+        float redValue = (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "redColor");
         glUseProgram(shaderProgram);
+        glUniform4f(vertexColorLocation, redValue, 0.0f, 0.0f, 1.0f);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

@@ -14,17 +14,20 @@ const GLuint windowWidth = 600;
 
 const GLchar* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"out vec3 vertexColor;\n"
 "void main()\n"
 "{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"   gl_Position = vec4(aPos, 1.0);\n"
+"   vertexColor = aColor;\n"
 "}\0";
 
 const GLchar* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"uniform vec4 redColor;\n"
+"in vec3 vertexColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = redColor;\n"
+"   FragColor = vec4(vertexColor, 1.0);\n"
 "}\0";
 
 int main()
@@ -106,16 +109,17 @@ int main()
 
     // star
     GLfloat vertices[] = {
-        0.0f, 0.9f, 0.0f, // 0, top
-        -0.5f, 0.3f, 0.0f, // 1, outer left 2nd level
-        -0.13f, 0.3f, 0.0f, // 2, inner left 2nd level
-        0.13f, 0.3f, 0.0f, // 3, inner right 2nd level
-        0.5f, 0.3f, 0.0f, // 4, outer right 2nd level
-        -0.25f, 0.0f, 0.0f, // 5, left 3rd level
-        0.1f, 0.0f, 0.0f, // 6, right 3rd level
-        0.0f, -0.15f, 0.0f, // 7, bott0m
-        -0.3f, -0.4f, 0.0f, // 8, bottom left
-        0.3f, -0.4f, 0.0f // 9, bottom right
+        // position         // color
+        0.0f, 0.9f, 0.0f,   1.0f, 0.0f, 0.0f, // 0, top
+        -0.5f, 0.3f, 0.0f,  0.0f, 1.0f, 0.0f,// 1, outer left 2nd level
+        -0.13f, 0.3f, 0.0f, 0.5f, 0.5f, 0.0f,// 2, inner left 2nd level
+        0.13f, 0.3f, 0.0f,  0.0f, 0.5f, 0.5f,// 3, inner right 2nd level
+        0.5f, 0.3f, 0.0f,   1.0f, 0.0f, 1.0f,// 4, outer right 2nd level
+        -0.25f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f,// 5, left 3rd level
+        0.1f, 0.0f, 0.0f,   0.0f, 0.5f, 0.5f,// 6, right 3rd level
+        0.0f, -0.15f, 0.0f, 0.0f, 1.0f, 0.0f,// 7, bottom
+        -0.3f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f,// 8, bottom left
+        0.3f, -0.4f, 0.0f,  0.0f, 0.0f, 1.0f,// 9, bottom right
     };
 
     GLint indices[] = {
@@ -140,9 +144,12 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // can unbind vbo safely
+    // color attribute for vertex attribute on attribute location 1
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -158,11 +165,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // get and set uniform variable location for redColor
-        float timeValue = static_cast<float>(glfwGetTime());
-        float redValue = (sin(timeValue) / 2.0f) + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(shaderProgram, "redColor");
         glUseProgram(shaderProgram);
-        glUniform4f(vertexColorLocation, redValue, 0.0f, 0.0f, 1.0f);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);

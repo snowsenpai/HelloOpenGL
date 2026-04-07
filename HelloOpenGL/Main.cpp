@@ -40,8 +40,10 @@ int main()
         return -1;
     }
 
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     // configure the size of the rendering window for opengl
-    glViewport(0, 0, windowWidth, windowHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
 
     // compile shaders and link shader program for star vertices
     Shader starShader("./shaders/star.vert", "./shaders/star.frag");

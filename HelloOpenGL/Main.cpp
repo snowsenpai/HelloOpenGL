@@ -13,23 +13,19 @@ const GLuint windowWidth = 600;
 
 const GLchar* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"out vec4 greenColor;\n"
 "void main()\n"
 "{\n"
 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"   greenColor = vec4(0.0f, 1.0f, 0.1f, 1.0);\n"
 "}\0";
 
 const GLchar* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+"in vec4 greenColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\0";
-
-const GLchar* yelowFragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+"   FragColor = greenColor;\n"
 "}\0";
 
 int main()
@@ -91,19 +87,6 @@ int main()
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
-    
-    GLuint yellowFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(yellowFragmentShader, 1, &yelowFragmentShaderSource, NULL);
-    glCompileShader(yellowFragmentShader);
-
-    glGetShaderiv(yellowFragmentShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(yellowFragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
 
     GLuint shaderProgram;
     shaderProgram = glCreateProgram();
@@ -119,23 +102,8 @@ int main()
         std::cout << "ERROR::SHADER::PROGRAM::LINKER_FAILED\n" << infoLog << std::endl;
     }
 
-    GLuint yellowShaderProgram;
-    yellowShaderProgram = glCreateProgram();
-
-    glAttachShader(yellowShaderProgram, vertexShader);
-    glAttachShader(yellowShaderProgram, yellowFragmentShader);
-    glLinkProgram(yellowShaderProgram);
-
-    glGetProgramiv(yellowShaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(yellowShaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::YELLO_SHADER::PROGRAM::LINKER_FAILED\n" << infoLog << std::endl;
-    }
-
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-    glDeleteShader(yellowFragmentShader);
 
     // star
     GLfloat vertices[] = {

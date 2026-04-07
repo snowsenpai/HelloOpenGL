@@ -1,8 +1,9 @@
+#include "shader.h"
+
 #include <glad/glad.h> // glad manages function pointers for OpenGL
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <cmath>
 
 // handle window resize
 void frame_buffer_size_callback(GLFWwindow* window, int width, int height);
@@ -11,24 +12,6 @@ void processInput(GLFWwindow* window);
 
 const GLuint windowHeight = 800;
 const GLuint windowWidth = 600;
-
-const GLchar* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 vertexColor;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos, 1.0);\n"
-"   vertexColor = aColor;\n"
-"}\0";
-
-const GLchar* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"in vec3 vertexColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(vertexColor, 1.0);\n"
-"}\0";
 
 int main()
 {
@@ -60,54 +43,10 @@ int main()
     // configure the size of the rendering window for opengl
     glViewport(0, 0, windowWidth, windowHeight);
 
-    // setup for object buffers and shader programs
-    // compile shaders and link shader program before setting up buffer objects
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
-    if (!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    GLuint shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKER_FAILED\n" << infoLog << std::endl;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    // star
+    // compile shaders and link shader program for star vertices
+    Shader starShader("./shaders/star.vert", "./shaders/star.frag");
+    
+    // star vertices
     GLfloat vertices[] = {
         // position         // color
         0.0f, 0.9f, 0.0f,   1.0f, 0.0f, 0.0f, // 0, top
@@ -165,7 +104,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // get and set uniform variable location for redColor
-        glUseProgram(shaderProgram);
+        starShader.use();
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
@@ -179,7 +118,6 @@ int main()
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
-    glDeleteProgram(shaderProgram);
 
     glfwTerminate();
     return 0;

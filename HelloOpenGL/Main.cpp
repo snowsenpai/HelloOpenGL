@@ -107,7 +107,6 @@ int main()
 
         // get and set uniform variable location for redColor
         starShader.use();
-        starShader.setFloat("xOffset", 0.25f);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);

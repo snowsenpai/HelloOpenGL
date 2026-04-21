@@ -37,4 +37,15 @@
     <None Include="shaders\star.frag" />
     <None Include="shaders\star.vert" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\awesomeface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\container.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

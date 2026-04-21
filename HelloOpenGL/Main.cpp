@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "stb_image.h"
 
 #include <glad/glad.h> // glad manages function pointers for OpenGL
 #include <GLFW/glfw3.h>
@@ -50,24 +51,16 @@ int main()
     
     // star vertices
     GLfloat vertices[] = {
-        // position         // color
-        0.0f, 0.9f, 0.0f,   1.0f, 0.0f, 0.0f, // 0, top
-        -0.5f, 0.3f, 0.0f,  0.0f, 1.0f, 0.0f,// 1, outer left 2nd level
-        -0.13f, 0.3f, 0.0f, 0.5f, 0.5f, 0.0f,// 2, inner left 2nd level
-        0.13f, 0.3f, 0.0f,  0.0f, 0.5f, 0.5f,// 3, inner right 2nd level
-        0.5f, 0.3f, 0.0f,   1.0f, 0.0f, 1.0f,// 4, outer right 2nd level
-        -0.25f, 0.0f, 0.0f, 0.5f, 0.5f, 0.0f,// 5, left 3rd level
-        0.1f, 0.0f, 0.0f,   0.0f, 0.5f, 0.5f,// 6, right 3rd level
-        0.0f, -0.15f, 0.0f, 0.0f, 1.0f, 0.0f,// 7, bottom
-        -0.3f, -0.4f, 0.0f, 1.0f, 0.0f, 0.0f,// 8, bottom left
-        0.3f, -0.4f, 0.0f,  0.0f, 0.0f, 1.0f,// 9, bottom right
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
-
+    
     GLint indices[] = {
-        0, 5, 9,   // 1st triangle
-        1, 2, 5,    // 2nd triangle
-        3, 4, 6,   // 3rd triangle
-        5, 8, 7    // 4th triangle
+        0, 1, 3,   // 1st triangle
+        1, 2, 3,    // 2nd triangle
     };
 
     // setup buffer objects
@@ -86,11 +79,68 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color attribute for vertex attribute on attribute location 1
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    GLuint texture1, texture2;
+
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    // set texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char* data = stbi_load("./textures/wall.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+
+    stbi_image_free(data);
+
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    data = stbi_load("./textures/awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data) {
+        // awesomeface.png has transparency, an alpha channel is present, the data type is of GL_RGBA
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    
+    // specify which texture unit each shader sampler belongs to, (only done once)
+    starShader.use();
+    starShader.setInt("texture1", 0);
+    starShader.setInt("texture2", 1);
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -105,18 +155,23 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // get and set uniform variable location for redColor
-        starShader.use();
 
+        // bind textures on corresponding texture units
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
+        // render container
+        starShader.use();
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // check and call events and swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    // optionally deallocate resources
+    // optionally de-allocate resources
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
